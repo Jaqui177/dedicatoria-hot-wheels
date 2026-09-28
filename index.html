@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Una carrera para ti</title>
+	<style>
+		:root {
+			--ink: #101322;
+			--navy: #111a38;
+			--red: #e83d45;
+			--gold: #ffd84a;
+			--cream: #fff8df;
+			--blue: #37c5e8;
+		}
+
+		* { box-sizing: border-box; }
+		html { scroll-behavior: smooth; }
+		body { margin: 0; overflow-x: hidden; color: var(--cream); background: var(--ink); font-family: Georgia, 'Times New Roman', serif; }
+		button { font: inherit; }
+
+		.page {
+			position: relative;
+			min-height: 100svh;
+			overflow: hidden;
+			background: radial-gradient(circle at 50% 10%, #344a79 0, #111a38 38%, #070912 100%);
+		}
+
+		.page::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			opacity: .45;
+			background-image: linear-gradient(120deg, transparent 0 48%, rgba(255,255,255,.08) 49%, transparent 50%), linear-gradient(35deg, transparent 0 48%, rgba(255,216,74,.08) 49%, transparent 50%);
+			background-size: 90px 90px, 130px 130px;
+			pointer-events: none;
+		}
+
+		.stars { position: absolute; inset: 0; pointer-events: none; }
+		.stars i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px var(--gold); animation: blink 2s infinite alternate; }
+		.stars i:nth-child(1) { top: 13%; left: 14%; } .stars i:nth-child(2) { top: 23%; right: 17%; animation-delay: .5s; }
+		.stars i:nth-child(3) { top: 45%; left: 8%; animation-delay: 1s; } .stars i:nth-child(4) { top: 54%; right: 9%; animation-delay: 1.4s; }
+
+		.cover {
+			position: fixed;
+			inset: 0;
+			z-index: 5;
+			display: grid;
+			place-items: center;
+			padding: 25px;
+			text-align: center;
+			background: rgba(7, 9, 18, .88);
+			backdrop-filter: blur(10px);
+			transition: opacity .8s ease, visibility .8s ease;
+		}
+		.cover.closed { opacity: 0; visibility: hidden; pointer-events: none; }
+		.cover-content { width: min(100%, 430px); animation: appear .8s both; }
+		.badge { display: inline-block; padding: 7px 12px; border: 1px solid var(--gold); color: var(--gold); font: 800 .63rem Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+		.cover h1 { margin: 24px 0 12px; color: white; font: 900 clamp(3rem, 14vw, 6rem)/.8 Arial, sans-serif; letter-spacing: -.07em; text-transform: uppercase; text-shadow: 5px 5px 0 var(--red); }
+		.cover p { margin: 0 auto 30px; max-width: 290px; color: #d6e0ff; font: .8rem/1.7 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+		.open { border: 0; padding: 16px 25px; color: var(--ink); background: var(--gold); box-shadow: 5px 5px 0 var(--red); cursor: pointer; font: 900 .72rem Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+		.open:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--red); }
+		.open:focus-visible { outline: 3px solid white; outline-offset: 5px; }
+
+		main { position: relative; z-index: 1; width: min(760px, 100%); margin: auto; padding: 55px 24px 130px; }
+		.hero { min-height: 90svh; display: grid; place-items: center; text-align: center; }
+		.eyebrow { color: var(--blue); font: 900 .68rem Arial, sans-serif; letter-spacing: .25em; text-transform: uppercase; }
+		.hero h2 { margin: 20px 0 14px; color: white; font: 900 clamp(3.5rem, 18vw, 9rem)/.75 Arial, sans-serif; letter-spacing: -.1em; text-transform: uppercase; text-shadow: 7px 7px 0 var(--red); }
+		.hero h2 span { display: block; color: var(--gold); text-shadow: 6px 6px 0 var(--red); }
+		.hero p { margin: 0 auto; max-width: 350px; color: #d6e0ff; font: 700 .84rem/1.6 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+		.down { display: inline-block; margin-top: 44px; color: var(--gold); font: 900 .7rem Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; animation: float 1.8s ease-in-out infinite; }
+
+		.garage { position: relative; margin: 0 auto 110px; padding: 32px 20px 42px; border: 2px solid rgba(255,216,74,.65); background: linear-gradient(145deg, rgba(232,61,69,.2), rgba(16,19,34,.72)); box-shadow: 10px 10px 0 rgba(55,197,232,.2), 0 20px 50px rgba(0,0,0,.3); text-align: center; }
+		.garage::before, .garage::after { content: ''; position: absolute; top: 15px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 12px var(--red); }
+		.garage::before { left: 15px; } .garage::after { right: 15px; background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+		.garage-label { color: var(--gold); font: 900 .68rem Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+		.car-wrap { position: relative; height: 145px; margin: 22px -20px 0; overflow: hidden; background: repeating-linear-gradient(90deg, transparent 0 52px, rgba(255,255,255,.05) 53px 54px), #0b0d19; }
+		.car-wrap::after { content: ''; position: absolute; left: 0; right: 0; bottom: 25px; border-top: 4px dashed var(--gold); }
+		.car { position: absolute; z-index: 1; left: -70px; bottom: 48px; color: var(--gold); font: 900 3.3rem Arial, sans-serif; text-shadow: 5px 5px 0 var(--red), 0 0 20px var(--blue); transform: skewX(-10deg); animation: race 5s linear infinite; }
+		.garage h3 { margin: 25px 0 0; color: white; font: 900 clamp(1.7rem, 7vw, 3rem)/.95 Arial, sans-serif; letter-spacing: -.05em; text-transform: uppercase; }
+
+		.message { position: relative; padding: 34px clamp(24px, 7vw, 62px) 40px; color: var(--ink); background: var(--cream); box-shadow: 0 12px 0 var(--red), 0 24px 55px rgba(0,0,0,.35); transform: rotate(1deg); }
+		.message::before { content: 'PARA TI'; position: absolute; top: 22px; right: 23px; color: var(--red); font: 900 .65rem Arial, sans-serif; letter-spacing: .18em; }
+		.message h3 { margin: 0 0 28px; color: var(--red); font: 900 2rem Arial, sans-serif; letter-spacing: -.05em; text-transform: uppercase; }
+		.message p { margin: 0 0 21px; font-size: clamp(1.1rem, 3.8vw, 1.35rem); line-height: 1.52; }
+		.message p:last-child { margin: 0; color: #c32e43; font-weight: 700; }
+		.sign { margin-top: 70px; text-align: center; color: #d6e0ff; font: italic 1.2rem Georgia, serif; }
+		.sign strong { display: block; margin-top: 8px; color: var(--gold); font-size: 1.8rem; }
+
+		@keyframes appear { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+		@keyframes blink { from { opacity: .2; transform: scale(.7); } to { opacity: 1; transform: scale(1.4); } }
+		@keyframes float { 50% { transform: translateY(7px); opacity: .55; } }
+		@keyframes race { from { transform: translateX(0) skewX(-10deg); } to { transform: translateX(calc(100vw + 150px)) skewX(-10deg); } }
+		@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
+	</style>
+</head>
+<body>
+	<div class="page">
+		<div class="stars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+		<section class="cover" id="cover" aria-label="Portada">
+			<div class="cover-content">
+				<span class="badge">Edición especial · 2026</span>
+				<h1>Una carrera<br>para ti</h1>
+				<p>Hay sorpresas que no se guardan en una caja. Se sienten.</p>
+				<button class="open" id="open" type="button">Abrir sorpresa</button>
+			</div>
+		</section>
+
+		<main>
+			<section class="hero">
+				<div>
+					<div class="eyebrow">Motor encendido · Corazón lleno</div>
+					<h2>Para <span>ti</span></h2>
+					<p>Abro la pista para dedicarte algo que viene con mucho cariño.</p>
+					<div class="down">Baja para descubrirlo ↓</div>
+				</div>
+			</section>
+
+			<section class="garage" aria-label="Carrera de carritos">
+				<div class="garage-label">Garage 001 · salida lista</div>
+				<div class="car-wrap"><div class="car" aria-hidden="true">🏎️</div></div>
+				<h3>Listo para<br>arrancar</h3>
+			</section>
+
+			<article class="message">
+				<h3>Mi mensaje</h3>
+				<p>De todas las vueltas que da la vida, qué bonito coincidir contigo.</p>
+				<p>Gracias por las risas, los momentos y por hacer especiales hasta los días más sencillos.</p>
+				<p>Esta pequeña carrera es para recordarte que eres alguien increíble y muy especial para mí.</p>
+			</article>
+
+			<div class="sign">Con mucho cariño<strong>Para alguien único</strong></div>
+		</main>
+	</div>
+	<script>
+		document.getElementById('open').addEventListener('click', function () {
+			document.getElementById('cover').classList.add('closed');
+		});
+	</script>
+</body>
+</html>
